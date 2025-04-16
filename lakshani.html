@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance and Tasks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .week {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .date-box {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            margin: 0 2px;
+        }
+
+        .date-box:hover {
+            background-color: #e0e0e0;
+        }
+
+        .date-box.present {
+            background-color: #b6e6b6; /* Green for Present */
+        }
+
+        .date-box.absent {
+            background-color: #f5bcbc; /* Red for Absent */
+        }
+
+        .task-details {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .attendance-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .btn-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        
+        .home-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        @media only screen and (max-width: 500px) {
+            body {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .week {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .date-box {
+                width: calc(20% - 10px);
+                margin: 5px;
+            }
+
+            .popup {
+                top: 40%;
+                left: 50%;
+                transform: translate(-50%, -40%);
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="home-page">
+    <h1>Attendance Tracking System</h1>
+    <div class="datetime" id="datetime"></div>
+    <div class="container" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%;">
+        <div class="box" onclick="showUserPage('Lakshani')" style="width: 150px; height: 150px; background-color: #3498db; color: #fff; font-size: 24px; display: flex; justify-content: center; align-items: center; margin: 10px; border-radius: 10px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2); cursor: pointer;">Lakshani</div>
+        <div class="box" onclick="showUserPage('Gayan')" style="width: 150px; height: 150px; background-color: #3498db; color: #fff; font-size: 24px; display: flex; justify-content: center; align-items: center; margin: 10px; border-radius: 10px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2); cursor: pointer;">Gayan</div>
+        <div class="box" onclick="showUserPage('Lakmini')" style="width: 150px; height: 150px; background-color: #3498db; color: #fff; font-size: 24px; display: flex; justify-content: center; align-items: center; margin: 10px; border-radius: 10px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2); cursor: pointer;">Lakmini</div>
+        <div class="box" onclick="showUserPage('Yasith')" style="width: 150px; height: 150px; background-color: #3498db; color: #fff; font-size: 24px; display: flex; justify-content: center; align-items: center; margin: 10px; border-radius: 10px; box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2); cursor: pointer;">Yasith</div>
+    </div>
+</div>
+
+<div id="user-page" style="display: none;">
+    <button class="home-btn" onclick="showHomePage()">← Back to Home</button>
+    <h1 id="pageTitle">Attendance and Tasks</h1>
+
+    <div style="margin-bottom: 20px;">
+        <label for="monthSelect">Select Month:</label>
+        <select id="monthSelect" class="form-control" onchange="renderCalendar()">
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8" selected>August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+    </div>
+
+    <div id="calendarContainer"></div>
+
+    <div class="btn-container">
+        <button class="btn" onclick="showAddTaskPopup()">Add Tasks</button>
+    </div>
+</div>
+
+<div id="popup" class="popup">
+    <h2 id="popupDate"></h2>
+    <div id="popupTasks"></div>
+    <div class="attendance-buttons">
+        <button class="btn btn-success" onclick="markAttendance('present')">Mark Present</button>
+        <button class="btn btn-danger" onclick="markAttendance('absent')">Mark Absent</button>
+    </div>
+    <center><button class="btn" onclick="hidePopup()">Close</button></center>
+</div>
+
+<div id="addTaskPopup" class="popup">
+    <h2>Add Tasks</h2>
+    <form id="taskForm">
+        <div>
+            <label for="taskDate">Date:</label>
+            <input type="date" id="taskDate" class="form-control" required>
+        </div>
+        <div>
+            <label for="taskDescription">Task Description:</label>
+            <textarea id="taskDescription" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="attendance-buttons">
+            <button type="button" class="btn btn-success" onclick="saveTask()">Save Task</button>
+            <button type="button" class="btn" onclick="hideAddTaskPopup()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let currentUser = "";
+    let currentDate = null;
+
+    // User data (manually update this data for testing purposes)
+    let userData = {
+        "Lakshani": {
+            tasks: {
+                "Aug 5": ["Complete project documentation", "Meeting with client at 2 PM"],
+                "Aug 10": ["Submit weekly report"]
+            },
+            attendance: {
+                "Aug 5": "present",
+                "Aug 6": "present",
+                "Aug 7": "absent",
+                "Aug 10": "present"
+            }
+        },
+        "Gayan": {
+            tasks: {
+                "Aug 3": ["Code review for new feature"],
+                "Aug 8": ["Team lunch at 12:30 PM", "Update database schema"]
+            },
+            attendance: {
+                "Aug 3": "present",
+                "Aug 4": "present",
+                "Aug 7": "present",
+                "Aug 8": "absent"
+            }
+        },
+        "Lakmini": {
+            tasks: {
+                "Aug 4": ["Prepare presentation slides"],
+                "Aug 9": ["QA testing for mobile app"]
+            },
+            attendance: {
+                "Aug 4": "present",
+                "Aug 5": "absent",
+                "Aug 9": "present"
+            }
+        },
+        "Yasith": {
+            tasks: {
+                "Aug 2": ["Design website mockup"],
+                "Aug 6": ["Client meeting at 10 AM", "Update website content"]
+            },
+            attendance: {
+                "Aug 2": "present",
+                "Aug 6": "present",
+                "Aug 9": "absent"
+            }
+        }
+    };
+
+    // Save data to localStorage
+    function saveData() {
+        localStorage.setItem('userData', JSON.stringify(userData));  // Save the user data into localStorage
+    }
+
+    // Load data from localStorage if it exists
+    function loadData() {
+        const storedData = localStorage.getItem('userData');
+        if (storedData) {
+            userData = JSON.parse(storedData);  // Load the data into the userData variable
+        }
+    }
+
+    // Initialize the application
+    window.onload = function() {
+        loadData();  // Load data from localStorage
+        renderCalendar();  // Render calendar on page load
+        updateDateTime();  // Update the current time
+        setInterval(updateDateTime, 1000); // Update every second to show live time
+    };
+
+    // Update date and time
+    function updateDateTime() {
+        const datetimeElement = document.getElementById('datetime');
+        const today = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const dateTimeString = today.toLocaleString('en-US', options);
+        datetimeElement.textContent = dateTimeString;
+    }
+
+    // Show user page
+    function showUserPage(username) {
+        currentUser = username;
+        document.getElementById('home-page').style.display = 'none';
+        document.getElementById('user-page').style.display = 'block';
+        document.getElementById('pageTitle').textContent = `Attendance and Tasks - ${currentUser}`;
+        
+        // Ensure user data structure exists
+        if (!userData[currentUser]) {
+            userData[currentUser] = {
+                tasks: {},
+                attendance: {}
+            };
+        }
+        
+        renderCalendar();
+    }
+
+    // Show home page
+    function showHomePage() {
+        document.getElementById('home-page').style.display = 'block';
+        document.getElementById('user-page').style.display = 'none';
+    }
+
+    // Render the calendar based on selected month
+    function renderCalendar() {
+        const monthSelect = document.getElementById('monthSelect');
+        const selectedMonth = parseInt(monthSelect.value);
+        const monthName = monthSelect.options[monthSelect.selectedIndex].text;
+        const currentYear = new Date().getFullYear(); // Use current year
+        
+        const container = document.getElementById('calendarContainer');
+        container.innerHTML = '';
+        
+        // Add month header
+        const monthHeader = document.createElement('div');
+        monthHeader.innerHTML = `<p style="color:blue; text-align:center; font-weight:bold">${monthName}</p><br>`;
+        container.appendChild(monthHeader);
+        
+        // Calculate days in month
+        const daysInMonth = new Date(currentYear, selectedMonth, 0).getDate();
+        
+        // First day of the month (0 = Sunday, 1 = Monday, etc.)
+        const firstDay = new Date(currentYear, selectedMonth - 1, 1).getDay();
+        
+        // Calculate number of weeks needed
+        const totalDays = daysInMonth;
+        const totalWeeks = Math.ceil(totalDays / 7);
+        
+        // Create calendar in the correct order (top to bottom)
+        for (let week = 1; week <= totalWeeks; week++) {
+            const weekHeader = document.createElement('div');
+            weekHeader.innerHTML = `<b>Week ${week}</b>`;
+            container.appendChild(weekHeader);
+            
+            const weekContainer = document.createElement('div');
+            weekContainer.className = 'week';
+            
+            // Create 7 days per week
+            for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                const dayNumber = (week - 1) * 7 + dayOfWeek + 1 - firstDay;
+                
+                const dateBox = document.createElement('div');
+                dateBox.className = 'date-box';
+                
+                if (dayNumber > 0 && dayNumber <= daysInMonth) {
+                    dateBox.textContent = dayNumber;
+                    
+                    const dateStr = `${monthName.substring(0, 3)} ${dayNumber}`;
+                    
+                    if (userData[currentUser] && userData[currentUser].attendance[dateStr]) {
+                        dateBox.classList.add(userData[currentUser].attendance[dateStr]);
+                    }
+                    
+                    dateBox.onclick = function() {
+                        showPopup(dateStr);
+                    };
+                }
+                
+                weekContainer.appendChild(dateBox);
+            }
+            
+            container.appendChild(weekContainer);
+        }
+    }
+
+    // Show popup with task details
+    function showPopup(date) {
+        currentDate = date;
+        const popup = document.getElementById('popup');
+        const popupDate = document.getElementById('popupDate');
+        const popupTasks = document.getElementById('popupTasks');
+
+        const tasks = userData[currentUser].tasks[date] || [];
+
+        if (tasks.length > 0) {
+            const taskList = document.createElement("ul");
+
+            tasks.forEach((task, index) => {
+                const listItem = document.createElement("li");
+                const taskText = document.createElement("span");
+                taskText.textContent = task;
+                listItem.appendChild(taskText);
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "×";
+                deleteBtn.style.marginLeft = "10px";
+                deleteBtn.style.color = "red";
+                deleteBtn.style.background = "none";
+                deleteBtn.style.border = "none";
+                deleteBtn.style.cursor = "pointer";
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    deleteTask(date, index);
+                };
+                listItem.appendChild(deleteBtn);
+
+                taskList.appendChild(listItem);
+            });
+
+            popupDate.textContent = "Task Details for " + date;
+            popupTasks.innerHTML = "";
+            popupTasks.appendChild(taskList);
+        } else {
+            popupDate.textContent = "Task Details for " + date;
+            popupTasks.innerHTML = "<p>No tasks recorded for " + date + ".</p>";
+        }
+
+        popup.style.display = 'block';
+    }
+
+    // Hide task details popup
+    function hidePopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'none';
+    }
+
+    // Show Add Task popup
+    function showAddTaskPopup() {
+        const popup = document.getElementById('addTaskPopup');
+        popup.style.display = 'block';
+        
+        // Set default date to today
+        const today = new Date();
+        const dateInput = document.getElementById('taskDate');
+        dateInput.value = today.toISOString().substr(0, 10);
+    }
+    
+    // Hide Add Task popup
+    function hideAddTaskPopup() {
+        const popup = document.getElementById('addTaskPopup');
+        popup.style.display = 'none';
+    }
+
+    // Add new task
+    function saveTask() {
+        const dateInput = document.getElementById('taskDate');
+        const descriptionInput = document.getElementById('taskDescription');
+
+        if (!dateInput.value || !descriptionInput.value.trim()) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const date = new Date(dateInput.value);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const formattedDate = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+
+        if (!userData[currentUser].tasks[formattedDate]) {
+            userData[currentUser].tasks[formattedDate] = [];
+        }
+
+        userData[currentUser].tasks[formattedDate].push(descriptionInput.value.trim());
+        saveData();
+
+        descriptionInput.value = '';
+        hideAddTaskPopup();
+        renderCalendar();
+
+        alert('Task added successfully!');
+    }
+
+    // Delete task
+    function deleteTask(date, index) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            userData[currentUser].tasks[date].splice(index, 1);
+
+            if (userData[currentUser].tasks[date].length === 0) {
+                delete userData[currentUser].tasks[date];
+            }
+
+            saveData();
+            showPopup(date);
+        }
+    }
+
+    // Mark attendance
+    function markAttendance(status) {
+        if (!currentDate) return;
+
+        userData[currentUser].attendance[currentDate] = status;
+        saveData();
+        renderCalendar();
+        hidePopup();
+    }
+</script>
+</body>
+</html>
